@@ -1,0 +1,24 @@
+<<<<<<< HEAD
+#directories
+bower_components
+node_modules
+dist
+build
+.idea
+
+#files
+*.tgz
+*.log
+*.apk
+.idea/workspace.xml
+*.xml
+
+# Hide OS X stuff
+.DS_Store
+
+=======
+node_modules
+dist
+out
+*.log*
+>>>>>>> origin/v4

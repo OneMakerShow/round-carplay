@@ -1,0 +1,178 @@
+name: build
+
+on:
+  workflow_run:
+    workflows: ["typecheck"]
+    branches: [main, dev]
+    types: [completed]
+
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build'
+        required: true
+        default: 'main'
+
+permissions:
+  contents: write
+  actions: write 
+
+jobs:
+  build:
+    name: Build ${{ matrix.artifact_ext }} (${{ matrix.platform }}) on ${{ github.event.inputs.branch || github.event.workflow_run.head_branch || github.ref_name }}
+    if: ${{ (github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')) && github.actor != 'github-actions' }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - platform: x86_64
+            os: ubuntu-latest
+            arch: native
+            artifact_ext: AppImage
+          - platform: arm64
+            os: ubuntu-latest
+            arch: emulated
+            artifact_ext: AppImage
+          - platform: darwin
+            os: macos-latest
+            arch: native
+            artifact_ext: dmg
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.branch && format('refs/heads/{0}', github.event.inputs.branch) || format('refs/heads/{0}', github.event.workflow_run.head_branch) }}
+      
+      - name: Fetch latest Node.js 22.x
+        run: |
+          curl -s https://nodejs.org/dist/index.json | jq -r '[.[] | select(.version | test("^v22\\.\\d+\\.\\d+$"))][0].version' > .nvmrc
+          echo "Using Node version: $(cat .nvmrc)"
+
+      - name: Setup latest Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Read version from package.json
+        id: pkg
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build for x86_64 (native Ubuntu)
+        if: matrix.platform == 'x86_64'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3 python3-dev libusb-1.0-0-dev libudev-dev pkg-config libusb-1.0-0 libudev1
+          npm run install:clean
+          npx electron-rebuild -f
+          npm run typecheck
+          npm run build
+          npm run build:linux
+
+      - name: Build for ARM64 (emulated)
+        if: matrix.platform == 'arm64'
+        uses: uraimo/run-on-arch-action@v3
+        with:
+          arch: aarch64
+          distro: ubuntu24.04
+          run: |
+            apt-get update
+            apt-get install -y curl git
+            curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+            apt-get install -y nodejs build-essential python3 python3-dev libusb-1.0-0-dev libudev-dev pkg-config libusb-1.0-0 libudev1
+            echo "==> Waiting for file system to settle (QEMU workaround)..."
+            sleep 15
+            npm run install:clean
+            npx electron-rebuild -f
+            npm run typecheck
+            npm run build
+            npm run build:armLinux
+            mkdir -p /github/workspace/dist/
+            cp dist/*-arm64.AppImage /github/workspace/dist/
+
+      - name: Build for macOS (native)
+        if: matrix.platform == 'darwin'
+        run: |
+          brew update >/dev/null
+          for pkg in libusb pkg-config; do
+            if ! brew list --versions "$pkg" >/dev/null; then
+              echo "Installing $pkg..."
+              brew install "$pkg" >/dev/null
+            elif brew outdated --quiet | grep -q "^$pkg\$"; then
+              echo "Upgrading $pkg..."
+              brew upgrade "$pkg" >/dev/null
+            else
+              echo "$pkg is up-to-date."
+            fi
+          done
+          npm run install:clean
+          npx electron-rebuild -f
+          npm run typecheck
+          npm run build
+          npm run build:mac
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pi-carplay-${{ steps.pkg.outputs.version }}-${{ matrix.platform }}.${{ matrix.artifact_ext }}
+          path: |
+            dist/*${{ matrix.artifact_ext == 'dmg' && 'arm64.dmg' || (matrix.artifact_ext == 'AppImage' && (matrix.platform == 'arm64' && 'arm64.AppImage' || 'x86_64.AppImage')) }}
+          retention-days: 10
+
+      - name: Write version badge JSON
+        if: matrix.platform == 'x86_64'
+        run: |
+          BRANCH_NAME="${{ github.event.inputs.branch || github.event.workflow_run.head_branch || github.ref_name }}"
+          mkdir -p .github/badges
+          echo "{\"schemaVersion\":1,\"label\":\"${BRANCH_NAME}\",\"message\":\"v${{ steps.pkg.outputs.version }}\",\"color\":\"lightgrey\"}" > .github/badges/${BRANCH_NAME}-version.json
+
+      - name: Setup latest Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Push version badge to version branch
+        if: matrix.platform == 'x86_64'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH_NAME="${{ github.event.inputs.branch || github.event.workflow_run.head_branch || github.ref_name }}"
+          VERSION="${{ steps.pkg.outputs.version }}"
+          NODE_VERSION=$(node -v | sed 's/^v//')
+          NPM_VERSION=$(npm -v)
+
+          mkdir temp-badges
+          cd temp-badges
+
+          git clone --depth=1 --branch version "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}" .
+          
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          mkdir -p .github/badges
+          echo "{\"schemaVersion\":1,\"label\":\"${BRANCH_NAME}\",\"message\":\"v${VERSION}\",\"color\":\"lightblue\"}" > .github/badges/${BRANCH_NAME}-version.json
+          echo "{\"schemaVersion\":1,\"label\":\"node\",\"message\":\"${NODE_VERSION}\",\"color\":\"lightgrey\"}" > .github/badges/${BRANCH_NAME}-node.json
+          echo "{\"schemaVersion\":1,\"label\":\"npm\",\"message\":\"${NPM_VERSION}\",\"color\":\"lightgrey\"}" > .github/badges/${BRANCH_NAME}-npm.json
+
+          git add .github/badges/${BRANCH_NAME}-version.json
+          git add .github/badges/${BRANCH_NAME}-node.json
+          git add .github/badges/${BRANCH_NAME}-npm.json
+
+          git commit -m "Update ${BRANCH_NAME} badges: version ${VERSION}, node ${NODE_VERSION}, npm ${NPM_VERSION}" || echo "No changes"
+          git push
+          cd ..
+          rm -rf temp-badges
+
+  cleanup:
+    name: "Garbage Collection"
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') }}
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          retain_days: 10
+          keep_minimum_runs: 5

@@ -1,0 +1,45 @@
+appId: com.electron.app
+productName: pi-carplay
+
+directories:
+  buildResources: assets
+
+files:
+  - '!src/*'
+  - '!**/.vscode/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+
+asarUnpack:
+  - resources/**
+  - node_modules/usb/**
+
+linux:
+  target:
+    - AppImage
+  icon: icons/linux/pi-carplay.png   
+  maintainer: "Lasse Heitgres <hello@f-io.dev>"
+  category: Utility
+
+mac:
+  icon: icons/mac/pi-carplay.icns
+  category: public.app-category.utilities
+  extendInfo:
+    NSCameraUsageDescription: pi-carplay requires camera access for CarPlay.
+    NSMicrophoneUsageDescription: pi-carplay requires microphone access for voice control.
+    NSDocumentsFolderUsageDescription: pi-carplay requires access to documents.
+    NSDownloadsFolderUsageDescription: pi-carplay requires access to downloads.
+    
+dmg:
+  artifactName: ${name}-${version}-${arch}.${ext}
+
+appImage:
+  artifactName: ${name}-${version}-${arch}.${ext}
+
+npmRebuild: true
+
+publish:
+  provider: generic
+  url: "https://f-io.github.io/pi-carplay/releases/"

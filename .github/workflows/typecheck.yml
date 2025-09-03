@@ -1,0 +1,42 @@
+name: typecheck
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  ts-typecheck:
+    name: Type-Check
+    if: ${{ github.actor != 'github-actions' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Fetch latest Node.js 22.x
+        run: |
+          curl -s https://nodejs.org/dist/index.json | jq -r '[.[] | select(.version | test("^v22\\.\\d+\\.\\d+$"))][0].version' > .nvmrc
+          echo "Using Node version: $(cat .nvmrc)"
+
+      - name: Setup latest Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Ensure native build deps
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            build-essential python3 python3-dev libusb-1.0-0-dev libudev-dev     
+
+      - name: Clean & install dependencies
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install --no-audit --prefer-offline
+
+      - name: Run TypeScript type-check
+        run: npm run typecheck
