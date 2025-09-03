@@ -1,6 +1,6 @@
 {
-  "name": "pi-carplay",
-  "version": "3.5.4",
+  "name": "round-carplay",
+  "version": "0.1.0",
   "description": "An Electron application with React and TypeScript",
   "main": "./out/main/main.js",
   "author": "Lasse Heitgres",
