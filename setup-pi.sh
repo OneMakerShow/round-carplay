@@ -2,12 +2,12 @@
 set -euo pipefail
 
 # ----------------------------------------
-# pi-carplay Installer & Shortcut Creator
+# round-carplay Installer & Shortcut Creator
 # ----------------------------------------
 
 # 0) Variables
 USER_HOME="$HOME"
-APPIMAGE_PATH="$USER_HOME/pi-carplay/pi-carplay.AppImage"
+APPIMAGE_PATH="$USER_HOME/round-carplay/round-carplay.AppImage"
 APPIMAGE_DIR="$(dirname "$APPIMAGE_PATH")"
 
 echo "→ Creating target directory: $APPIMAGE_DIR"
@@ -40,14 +40,13 @@ sudo udevadm control --reload-rules
 sudo udevadm trigger
 
 # ICON INSTALLATION
-ICON_URL="https://raw.githubusercontent.com/f-io/pi-carplay/dev/assets/icons/linux/pi-carplay.png"
-ICON_DEST="$USER_HOME/.local/share/icons/pi-carplay.png"
+ICON_URL="https://raw.githubusercontent.com/OneMakerShow/round-carplay/custom-round/assets/icons/linux/pi-carplay.png"
+ICON_DEST="$USER_HOME/.local/share/icons/round-carplay.png"
 
 if [ -d "$USER_HOME/.local/share" ]; then
   echo "→ Installing icon to $ICON_DEST"
   mkdir -p "$(dirname "$ICON_DEST")"
   
-  # Download icon from GitHub
   echo "   Downloading icon from $ICON_URL..."
   curl -L "$ICON_URL" -o "$ICON_DEST"
   
@@ -60,15 +59,15 @@ else
   echo "   No ~/.local/share directory, skipping icon installation."
 fi
 
-# Fetch latest ARM64 AppImage from GitHub
-echo "→ Fetching latest pi-carplay release"
-latest_url=$(curl -s https://api.github.com/repos/f-io/pi-carplay/releases/latest \
+# Fetch latest ARM64 AppImage from your repo Release
+echo "→ Fetching latest round-carplay release"
+latest_url=$(curl -s https://api.github.com/repos/OneMakerShow/round-carplay/releases/latest \
   | grep "browser_download_url" \
   | grep "arm64.AppImage" \
   | cut -d '"' -f 4)
 
 if [ -z "$latest_url" ]; then
-  echo "Error: Could not find ARM64 AppImage URL" >&2
+  echo "Error: Could not find ARM64 AppImage URL in your repo releases" >&2
   exit 1
 fi
 
@@ -87,16 +86,16 @@ chmod +x "$APPIMAGE_PATH"
 echo "→ Creating autostart entry"
 AUTOSTART_DIR="$USER_HOME/.config/autostart"
 mkdir -p "$AUTOSTART_DIR"
-cat > "$AUTOSTART_DIR/pi-carplay.desktop" <<EOF
+cat > "$AUTOSTART_DIR/round-carplay.desktop" <<EOF
 [Desktop Entry]
 Type=Application
-Name=pi-carplay
+Name=round-carplay
 Exec=$APPIMAGE_PATH
-Icon=pi-carplay
+Icon=round-carplay
 X-GNOME-Autostart-enabled=true
 Categories=AudioVideo;
 EOF
-echo "Autostart entry at $AUTOSTART_DIR/pi-carplay.desktop"
+echo "Autostart entry at $AUTOSTART_DIR/round-carplay.desktop"
 
 # Create Desktop shortcut
 echo "→ Creating desktop shortcut"
@@ -107,18 +106,18 @@ else
 fi
 
 mkdir -p "$DESKTOP_DIR"
-cat > "$DESKTOP_DIR/pi-carplay.desktop" <<EOF
+cat > "$DESKTOP_DIR/round-carplay.desktop" <<EOF
 [Desktop Entry]
 Type=Application
-Name=pi-carplay
-Comment=Launch pi-carplay AppImage
+Name=round-carplay
+Comment=Launch round-carplay AppImage
 Exec=$APPIMAGE_PATH
-Icon=pi-carplay
+Icon=round-carplay
 Terminal=false
 Categories=Utility;
 StartupNotify=false
 EOF
-chmod +x "$DESKTOP_DIR/pi-carplay.desktop"
-echo "Desktop shortcut at $DESKTOP_DIR/pi-carplay.desktop"
+chmod +x "$DESKTOP_DIR/round-carplay.desktop"
+echo "Desktop shortcut at $DESKTOP_DIR/round-carplay.desktop"
 
 echo "✅ Installation complete!"

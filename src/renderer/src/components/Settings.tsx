@@ -207,7 +207,7 @@ const Settings: React.FC<SettingsProps> = ({ settings }) => {
   }
 
   return (
-    <Box className={theme.palette.mode === 'dark' ? 'App-header-dark' : 'App-header-light'} p={2} display="flex" flexDirection="column" height="100vh">
+    <Box className={theme.palette.mode === 'dark' ? 'App-header-dark' : 'App-header-light'} p={2} display="flex" flexDirection="column" height="100%">
       <Box sx={{ overflowY: 'auto', overflowX: 'hidden', flexGrow: 1, pt: 2, pb: 1, px: 1.5 }}>
         <Grid container spacing={2} sx={{ px: 1 }}>
           {renderField('WIDTH', 'width', 800)}
@@ -271,7 +271,7 @@ const Settings: React.FC<SettingsProps> = ({ settings }) => {
 
       <Dialog open={!!resetMessage} onClose={handleClosePopup}><DialogTitle>Reset Status</DialogTitle><DialogContent sx={{ textAlign: 'center' }}><Typography variant="body1" sx={{ mb: 2 }}>{resetMessage}</Typography><Box display="flex" justifyContent="center"><Button variant="outlined" onClick={handleClosePopup}>Close{closeCountdown > 0 ? ` (${closeCountdown})` : ''}</Button></Box></DialogContent></Dialog>
 
-      <Dialog open={openBindings} TransitionComponent={Transition} keepMounted PaperProps={{ sx: { minHeight: '80%', minWidth: '80%' } }} onClose={() => setOpenBindings(false)}><DialogTitle>Key Bindings</DialogTitle><DialogContent><KeyBindings settings={activeSettings} updateKey={settingsChange} /></DialogContent></Dialog>
+      <Dialog open={openBindings} TransitionComponent={Transition} keepMounted PaperProps={{ sx: { minHeight: '50%', minWidth: '50%' } }} onClose={() => setOpenBindings(false)}><DialogTitle>Key Bindings</DialogTitle><DialogContent><KeyBindings settings={activeSettings} updateKey={settingsChange} /></DialogContent></Dialog>
     </Box>
   )
 }
