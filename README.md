@@ -1,25 +1,32 @@
 <p align="center">
   <!-- Release -->
-  <img alt="Release" src="https://img.shields.io/github/v/release/f-io/pi-carplay?label=release"> &nbsp;&nbsp;&nbsp;
-  <!-- MAIN -->
-  <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/f-io/pi-carplay/version/.github/badges/main-version.json">
-  <img alt="TS Main" src="https://img.shields.io/github/actions/workflow/status/f-io/pi-carplay/typecheck.yml?branch=main&label=TS%20main&style=flat">
-  <img alt="Build Main" src="https://img.shields.io/github/actions/workflow/status/f-io/pi-carplay/build.yml?branch=main&label=build%20main&style=flat"> &nbsp;&nbsp;&nbsp;
-  <!-- DEV -->
-  <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/f-io/pi-carplay/version/.github/badges/dev-version.json">
-  <img alt="TS Dev" src="https://img.shields.io/github/actions/workflow/status/f-io/pi-carplay/typecheck.yml?branch=dev&label=TS%20dev&style=flat">
-  <img alt="Build Dev" src="https://img.shields.io/github/actions/workflow/status/f-io/pi-carplay/build.yml?branch=dev&label=build%20dev&style=flat">
+  <img alt="Release" src="https://img.shields.io/github/v/release/OneMakerShow/round-carplay?label=release">
+  <!-- Version -->
+  <img alt="Version" src="https://img.shields.io/github/package-json/v/OneMakerShow/round-carplay?label=version">
+  <!-- Build Main -->
+  <img alt="Build Main" src="https://img.shields.io/github/actions/workflow/status/OneMakerShow/round-carplay/build.yml?branch=main&label=build%20main&style=flat">
+  <!-- Typecheck Main -->
+  <img alt="Typecheck Main" src="https://img.shields.io/github/actions/workflow/status/OneMakerShow/round-carplay/typecheck.yml?branch=main&label=typecheck%20main&style=flat">
+  <!-- Build Dev -->
+  <img alt="Build Dev" src="https://img.shields.io/github/actions/workflow/status/OneMakerShow/round-carplay/build.yml?branch=dev&label=build%20dev&style=flat">
+  <!-- Typecheck Dev -->
+  <img alt="Typecheck Dev" src="https://img.shields.io/github/actions/workflow/status/OneMakerShow/round-carplay/typecheck.yml?branch=dev&label=typecheck%20dev&style=flat">
+  <!-- License -->
+  <img alt="License" src="https://img.shields.io/github/license/OneMakerShow/round-carplay">
 </p>
 
-# pi-carplay
 
-pi-carplay brings Apple CarPlay and Android Auto to the Raspberry Pi, with support for Linux (ARM/x86) and macOS (ARM) as well. It is a standalone Electron app, optimized for embedded setups and ultra-low-resolution OEM displays.  
+# Round Carplay
+
+Round Caraplay is an attempt to adapt the classic Apple CarPlay to a round screen using a Raspberry Pi. The idea is to display CarPlay in a central square area and then fill the surrounding space with information coming from the vehicle’s OBD bus.
+
+Support for Linux (ARM/x86) and macOS (ARM) as well. It is a standalone Electron app, optimized for embedded setups and ultra-low-resolution OEM displays.  
 
 > **Requirements:** A Carlinkit **CPC200-CCPA** (wireless & wired) or **CPC200-CCPW** (wired only) adapter.
 ## Installation (Raspberry Pi OS)
 
 ```bash
-curl -LO https://raw.githubusercontent.com/f-io/pi-carplay/main/setup-pi.sh
+curl -LO https://raw.githubusercontent.com/OneMakerShow/round-carplay/main/setup-pi.sh
 sudo chmod +x setup-pi.sh
 ./setup-pi.sh
 ```
@@ -36,27 +43,37 @@ The `setup-pi.sh` script performs the following tasks:
 
 ## Images
 <p align="center">
-  <img src="documentation/images/carplay.png"
+  <strong><span style="font-size:20px;">Reference, Mini Cooper Navigator System</span></strong>
+</p>
+
+<p align="center">
+  <img src="documentation/images/reference.jpg"
        alt="CarPlay"
        width="45%" />
 </p>
 
 <p align="center">
-  <img src="documentation/images/settings.png"
-       alt="Settings"
-       width="45%" />
-  &emsp;&emsp;
-  <img src="documentation/images/info.png"
-       alt="Info"
-       width="45%" />
+  <strong><span style="font-size:20px;">Real Device First Tests</span></strong>
 </p>
 
-## Build Environment
+<p align="center">
+  <img src="documentation/images/01.jpg"
+       alt="Settings"
+       width="20%" />
+  &emsp;&emsp;
+  <img src="documentation/images/02.jpg"
+       alt="Settings"
+       width="20%" />
+    &emsp;&emsp;
+  <img src="documentation/images/03.jpg"
+       alt="Settings"
+       width="20%" />
+    &emsp;&emsp;
+  <img src="documentation/images/04.jpg"
+       alt="Settings"
+       width="20%" />
+</p>
 
-![Node](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/f-io/pi-carplay/version/.github/badges/main-node.json)
-![npm](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/f-io/pi-carplay/version/.github/badges/main-npm.json)
-
----
 
 ### System Requirements (build)
 
@@ -73,7 +90,7 @@ Make sure the following packages and tools are installed on your system before b
 ### Clone & Build
 
 ```bash
-git clone --branch main --single-branch https://github.com/f-io/pi-carplay.git \
+git clone --branch main --single-branch https://github.com/OneMakerShow/round-carplay.git \
   && cd pi-carplay \
   && npm run install:clean \
   && npm run build \
@@ -87,7 +104,7 @@ git clone --branch main --single-branch https://github.com/f-io/pi-carplay.git \
 This AppImage has been tested on Debian Trixie (13). No additional software is required — just download the x86_64.AppImage and make it executable.
 
 ```bash
-chmod +x pi-carplay-*-x86_64.AppImage
+chmod +x round-carplay-*-x86_64.AppImage
 ```
 
 ---
@@ -97,7 +114,7 @@ chmod +x pi-carplay-*-x86_64.AppImage
 This step is required for all non-Apple-signed apps.
 
 ```bash
-xattr -cr /Applications/pi-carplay.app
+xattr -cr /Applications/round-carplay.app
 ```
 
 For microphone support, please install Sound eXchange (SoX) via brew.
@@ -109,8 +126,8 @@ brew install sox
 
 ## Links
 
-* **Repository & Issue Tracker:** [f-io/pi-carplay](https://github.com/f-io/pi-carplay)
-* **Inspired by:** [react-carplay](https://github.com/rhysmorgan134/react-carplay)
+* **Repository & Issue Tracker:** [OneMakerShow/round-carplay](https://github.com/OneMakerShow/round-carplay)
+* **Inspired by:** [pi-carplay](https://github.com/f-io/pi-carplay)
 
 ## Disclaimer
 
